@@ -46,31 +46,39 @@ draw (cairo_t *cr, struct options *options)
 
     cairo_select_font_face (cr,
 			    options->family, options->slant, options->weight);
-    cairo_set_font_size (cr, options->size);
 
-    cairo_text_extents (cr, options->text, &extents);
-    cairo_translate (cr,
-		     options->PAD - extents.x_bearing,
-		     options->PAD - extents.y_bearing);
+    double y = 0;
+    for (int i = 0; i < 18; i++) {
+	cairo_save (cr);
+	cairo_set_font_size (cr, options->size + i);
 
-    cairo_font_extents (cr, &font_extents);
-    cairo_rectangle (cr, 0, -font_extents.ascent,
-		     extents.x_advance, font_extents.height);
-    cairo_move_to (cr, -options->PAD, 0);
-    cairo_line_to (cr, extents.width + options->PAD, 0);
-    cairo_set_source_rgba (cr, 1, 0, 0, .7);
-    cairo_stroke (cr);
+	cairo_text_extents (cr, options->text, &extents);
+	cairo_translate (cr,
+			 options->PAD - extents.x_bearing,
+			 options->PAD - extents.y_bearing + y);
 
-    cairo_rectangle (cr,
-		     extents.x_bearing, extents.y_bearing,
-		     extents.width, extents.height);
-    cairo_set_source_rgba (cr, 0, 1, 0, .7);
-    cairo_stroke (cr);
+	cairo_font_extents (cr, &font_extents);
+	cairo_rectangle (cr, 0, -font_extents.ascent,
+			 extents.x_advance, font_extents.height);
+	cairo_move_to (cr, -options->PAD, 0);
+	cairo_line_to (cr, extents.width + options->PAD, 0);
+	cairo_set_source_rgba (cr, 1, 0, 0, .7);
+	cairo_stroke (cr);
 
-    cairo_move_to (cr, 0, 0);
-    cairo_set_source_rgb (cr, 0, 0, 1);
-    cairo_show_text (cr, options->text);
-    cairo_fill (cr);
+	cairo_rectangle (cr,
+			 extents.x_bearing, extents.y_bearing,
+			 extents.width, extents.height);
+	cairo_set_source_rgba (cr, 0, 1, 0, .7);
+	cairo_stroke (cr);
+
+	cairo_move_to (cr, 0, 0);
+	cairo_set_source_rgb (cr, 0, 0, 1);
+	cairo_show_text (cr, options->text);
+	cairo_fill (cr);
+
+	cairo_restore (cr);
+	y += font_extents.height + options->PAD;
+    }
 }
 
 static int
@@ -81,8 +89,8 @@ expose_event (struct options *options)
     cairo_surface_t *image;
 
     image = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
-					900,
-					300);
+					200,
+					900);
     cr = cairo_create (image);
     cairo_set_source_rgb (cr, 1, 1, 1);
     cairo_paint (cr);
@@ -100,11 +108,11 @@ int
 main (int argc, char **argv)
 {
     struct options options = {
-	"The Quick Brown Fox Jumps Over The Lazy Dog!",
-	"@cairo:small-caps",
+	"ニコ日",
+	"MS Gothic",
 	CAIRO_FONT_WEIGHT_NORMAL,
 	CAIRO_FONT_SLANT_NORMAL,
-	48,
+	10,
 	30,
 	"font-view.png"
     };
